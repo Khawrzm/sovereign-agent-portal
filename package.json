@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "botframework-webchat": "^4.19.1",
     "lucide-react": "^1.20.0",

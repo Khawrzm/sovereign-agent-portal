@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
 const ReactWebChat = dynamic(() => import('botframework-webchat'), {
@@ -7,14 +7,30 @@ const ReactWebChat = dynamic(() => import('botframework-webchat'), {
 });
 
 export default function Home() {
-  const directLine = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      const { createDirectLine } = require('botframework-webchat');
-      return createDirectLine({
-        secret: process.env.NEXT_PUBLIC_DIRECT_LINE_SECRET
-      });
-    }
-    return null;
+  const [directLine, setDirectLine] = useState(null);
+  const [status, setStatus] = useState('Initializing...');
+
+  useEffect(() => {
+    const initBot = async () => {
+      try {
+        const res = await fetch('/api/token');
+        const data = await res.json();
+
+        if (data.token) {
+          const { createDirectLine } = await import('botframework-webchat');
+          setDirectLine(createDirectLine({ token: data.token }));
+          setStatus('Connected');
+        } else {
+          setStatus('Error: Failed to fetch token');
+          console.error('Token fetch error:', data);
+        }
+      } catch (err) {
+        setStatus('Error: Connectivity failure');
+        console.error('Bot init error:', err);
+      }
+    };
+
+    initBot();
   }, []);
 
   const styleOptions = {
@@ -53,7 +69,7 @@ export default function Home() {
           border-bottom: 1px solid #1a1a1a;
           display: flex;
           align-items: center;
-          gap: 15px;
+          justify-content: gap: 15px;
         }
         .logo {
           width: 40px;
@@ -103,27 +119,32 @@ export default function Home() {
       
       <header>
         <div className="logo">K</div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div className="title">SOVEREIGN AGENT</div>
           <div className="subtitle">Claude Opus // Direct Line Orbit</div>
+        </div>
+        <div style={{ fontSize: '10px', color: status.startsWith('Error') ? '#ef4444' : '#22c55e', fontWeight: 'bold' }}>
+          {status}
         </div>
       </header>
 
       <main>
         <div className="webchat-container">
-          {directLine && (
+          {directLine ? (
             <ReactWebChat 
               directLine={directLine} 
               styleOptions={styleOptions}
               userID="Sovereign_User"
             />
+          ) : (
+            <div className="loading">{status}</div>
           )}
         </div>
       </main>
 
       <footer>
         <div style={{ padding: '10px', fontSize: '10px', color: '#333', textAlign: 'center' }}>
-          OP_ROOT_HASH: CONNECTED_TO_DIRECT_LINE
+          OP_ROOT_HASH: {status === 'Connected' ? 'ENCRYPTED_SESSION_ACTIVE' : 'NEGOTIATING_HANDSHAKE'}
         </div>
       </footer>
     </div>
