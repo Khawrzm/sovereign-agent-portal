@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://directline.botframework.com/v3/directline/tokens/generate', {
+    const response = await fetch('https://europe.directline.botframework.com/v3/directline/tokens/generate', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${secret}`,
