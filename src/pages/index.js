@@ -18,7 +18,10 @@ export default function Home() {
 
         if (data.token) {
           const { createDirectLine } = await import('botframework-webchat');
-          setDirectLine(createDirectLine({ token: data.token }));
+          setDirectLine(createDirectLine({ 
+            token: data.token,
+            domain: 'https://europe.directline.botframework.com/v3/directline'
+          }));
           setStatus('Connected');
         } else {
           setStatus('Error: Failed to fetch token');
